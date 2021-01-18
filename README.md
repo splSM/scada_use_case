@@ -1,5 +1,7 @@
 # scada_use_case
 
+![Dashboard](https://github.com/splsm/scada_use_case/blob/main/static/scada.png?raw=true)
+
 A quick Splunk app for playing around with the use case described in this Reddit thread: https://www.reddit.com/r/Splunk/comments/kxmotd/how_to_solve_the_following_problem_with_splunk/ (I went with "SCADA" in the name since the dataset seemed like something a SCADA system would spit out).
 
 The app has a little Python event generator, which will output events every 9ish seconds. It outputs to a file rather than to stdout so that you can mess around with the file, if you want. **Be sure to change the output file location in the script itself, if you don't want it to save in the app's log/ directory. Also be sure to change the directories in the app's inputs.conf, if your Splunk is installed elsewhere or you want to save the output file elsewhere.**
