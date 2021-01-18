@@ -1,0 +1,4 @@
+<nav search_view="search" color="#e20082">
+  <view name="scada_use_case" default="true" />
+  <view name="search" />
+</nav>

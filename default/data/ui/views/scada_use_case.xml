@@ -1,0 +1,62 @@
+<dashboard theme="dark">
+  <label>SCADA Use Case</label>
+  <row>
+    <panel>
+      <html>
+        <p>
+          - Where Event BRAVO occurs after Event ALFA, <u>and</u>:
+          <br />
+          &#160;&#160;- The first character in the EVENT_TEXT field is the same between ALFA and BRAVO, <u>and</u>:
+          <br />
+          &#160;&#160;&#160;&#160;- The second character in the EVENT_TEXT field of BRAVO is the same or +1/-1 of the second character in the EVENT_TEXT field of ALFA, <u>and</u>:
+          <br />
+          &#160;&#160;&#160;&#160;&#160;&#160;- The EVENT_CAT field of ALFA is "ALARM"
+          <br />
+          &#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;<u>OR</u>
+          <br />
+          &#160;&#160;&#160;&#160;&#160;&#160;- The EVENT_CAT field of ALFA is "CLEARED" <u>and</u> BRAVO occurs within 60 minutes of ALFA
+        </p>
+        <style>
+          p {
+            line-height: 66%;
+			font-family: Courier;
+          }
+        </style>
+      </html>
+    </panel>
+  </row>
+  <row>
+    <panel>
+      <table>
+        <search>
+          <query>
+            <![CDATA[
+index=main sourcetype="scada:log"
+| eval EVENT_TEXT_1=substr(EVENT_TEXT, 1, 1),
+       EVENT_CHECK=if( match(EVENT_TYPE, "BRAVO"), substr(EVENT_TEXT, 2, 1), null() ),
+       EVENT_TARGET_1=if( match(EVENT_TYPE, "ALFA"), tonumber(substr(EVENT_TEXT, 2, 1))-1, null() ),
+       EVENT_TARGET_2=if( match(EVENT_TYPE, "ALFA"), substr(EVENT_TEXT, 2, 1), null() ),
+       EVENT_TARGET_3=if( match(EVENT_TYPE, "ALFA"), tonumber(substr(EVENT_TEXT, 2, 1))+1, null() ),
+       EVENT_TEXT_ALFA=if( match(EVENT_TYPE, "ALFA"), EVENT_TEXT, null() ),
+       EVENT_TEXT_BRAVO=if( match(EVENT_TYPE, "BRAVO"), EVENT_TEXT, null() ),
+       EVENT_TIME_ALFA=if( match(EVENT_TYPE, "ALFA"), _time, null() ),
+       EVENT_TIME_BRAVO=if( match(EVENT_TYPE, "BRAVO"), _time, null() ),
+       EVENT_CAT_ALFA=if( match(EVENT_TYPE, "ALFA"), EVENT_CAT, null() ),
+       EVENT_CAT_BRAVO=if( match(EVENT_TYPE, "BRAVO"), EVENT_CAT, null() )
+| transaction EVENT_TEXT_1 startswith="ALFA" endswith="BRAVO"
+| eval EVENT_MATCH_TEXT=if( match(EVENT_CHECK, EVENT_TARGET_1) OR match(EVENT_CHECK, EVENT_TARGET_2) OR match(EVENT_CHECK, EVENT_TARGET_3), "YES", "NO" ),
+       EVENT_MATCH_TIME=if( (EVENT_TIME_BRAVO-EVENT_TIME_ALFA)<3601, "YES", "NO" ),
+       EVENT_TIME_ALFA=strftime(EVENT_TIME_ALFA, "%Y-%m-%d %H:%M:%S"),
+       EVENT_TIME_BRAVO=strftime(EVENT_TIME_BRAVO, "%Y-%m-%d %H:%M:%S")
+| where EVENT_MATCH_TEXT="YES" AND ( EVENT_CAT_ALFA="ALARM" OR ( EVENT_CAT_ALFA="CLEARED" AND EVENT_MATCH_TIME="YES" ) )
+| table EVENT_TIME_ALFA EVENT_CAT_ALFA EVENT_TEXT_ALFA EVENT_TIME_BRAVO EVENT_CAT_BRAVO EVENT_TEXT_BRAVO
+            ]]>
+          </query>
+          <earliest>1610946000</earliest>
+          <latest>1611032400</latest>
+        </search>
+        <option name="drilldown">none</option>
+      </table>
+    </panel>
+  </row>
+</dashboard>
