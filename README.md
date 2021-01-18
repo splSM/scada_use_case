@@ -6,7 +6,13 @@ A quick Splunk app for playing around with the use case described in this Reddit
 
 The app has a little Python event generator, which will output events every 9ish seconds. It outputs to a file rather than to stdout so that you can mess around with the file, if you want. **Be sure to change the output file location in the script itself, if you don't want it to save in the app's log/ directory. Also be sure to change the directories in the app's inputs.conf, if your Splunk is installed elsewhere or you want to save the output file elsewhere.**
 
-The app has a dashboard with a |transaction search on it, which I believe satisfies the use case. The search can probably be done with |stats instead, but for now it works fine and I'm hungry, so I'm going to call it done. The dashboard runs the search looking for events from 2020-01-18, just so results will populate right away, since the sample log included here is from that day; feel free to change the dashboard to whatever timeframe you want, if you're running the even generator. Here's the search itself; I went with "ALFA" and "BRAVO" instead of "event_A" and "event_B" from the Reddit post.
+The app has a dashboard with a |transaction search on it, which I believe satisfies the use case. The search can probably be done with |stats instead, but for now it works fine and I'm hungry, so I'm going to call it done.
+
+The dashboard runs the search looking for events from 2020-01-18, just so results will populate right away, since the sample log included here is from that day; feel free to change the dashboard to whatever timeframe you want, if you're running the event generator.
+
+NOTE: I'm fully aware that this sample dataset and generator are likely either (A) much faster than the "real" dataset and/or (B) over-simplified compared to the "real" dataset, but assuming that the explicitly-described requirements from Reddit are correct - regardless of what else may be in the "real" data, this search *should* do the trick.
+
+Here's the search itself; I went with "ALFA" and "BRAVO" instead of "event_A" and "event_B" from the Reddit post.
 ```
 index=main sourcetype="scada:log"
 | eval EVENT_TEXT_1=substr(EVENT_TEXT, 1, 1),
